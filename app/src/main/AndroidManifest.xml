@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="klusman.scaantirevents" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:icon="@drawable/an_tir_logo"
+        android:label="AnTir Events"
+        android:name=".mobile.MyApp"
+        android:allowBackup="true">
+
+
+        <activity
+            android:label="@string/app_name"
+            android:name=".mobile.SplashActivity"
+            android:windowSoftInputMode="adjustPan">
+
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".mobile.MyActivity"
+            android:windowSoftInputMode="adjustPan"/>
+
+        <activity
+            android:name=".mobile.EventListActivity"
+            android:windowSoftInputMode="adjustPan"/>
+
+
+    </application>
+
+</manifest>

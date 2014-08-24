@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SCA An Tir Events</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="progress_msg">    Loading Data...    </string>
+    <string name="progress">  Processing Request  </string>
+    <string name="error">Error</string>
+    <string name="connection_problem">Connection problem</string>
+
+</resources>

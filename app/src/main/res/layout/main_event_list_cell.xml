@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="15dp">
+
+    <TextView
+        android:id="@+id/cell_title"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Default Title"/>
+
+    <TextView
+        android:id="@+id/cell_Location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TBD"/>
+
+    <TextView
+        android:id="@+id/cell_date_range"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="start"/>
+
+</LinearLayout>
