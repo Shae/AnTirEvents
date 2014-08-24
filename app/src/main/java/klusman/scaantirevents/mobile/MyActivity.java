@@ -40,12 +40,14 @@ import klusman.scaantirevents.R;
 import klusman.scaantirevents.mobile.Dao.DaoMaster;
 import klusman.scaantirevents.mobile.Dao.DaoSession;
 import klusman.scaantirevents.mobile.Dao.EventDao;
+import klusman.scaantirevents.mobile.Objects.CellEvent;
 import klusman.scaantirevents.mobile.Objects.Event;
+import klusman.scaantirevents.mobile.Objects.ListHeader;
 
 
 public class MyActivity extends Activity{
 
-    private ProgressDialog progressDialog;
+
 
     EventDao eDao;
     DaoSession sDao;
@@ -56,8 +58,9 @@ public class MyActivity extends Activity{
 
     List<JSONObject> JsonList = new ArrayList<JSONObject>();
     List<Event> eList = new ArrayList<Event>();
+    List<View> vList = new ArrayList<View>();
 
-
+    private ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -80,6 +83,7 @@ public class MyActivity extends Activity{
             public void onClick(View v) {
                 Intent goToEvents = new Intent(MyActivity.this, EventListActivity.class);
                 startActivity(goToEvents);
+
             }
         });
 
@@ -355,5 +359,7 @@ public class MyActivity extends Activity{
         cal.setTime(date);
         return cal;
     }
+
+
 
 }
