@@ -57,8 +57,6 @@ public class MyActivity extends Activity{
     Date maxDate;
 
     List<JSONObject> JsonList = new ArrayList<JSONObject>();
-    List<Event> eList = new ArrayList<Event>();
-    List<View> vList = new ArrayList<View>();
 
     private ProgressDialog progressDialog;
     @Override
@@ -289,7 +287,6 @@ public class MyActivity extends Activity{
     }
 
     public void makeNewEvent(JSONObject jObject){
-        //Log.i("TAG", "Make Event");
         Event event = new Event();
         event.__setDaoSession(sDao);
 

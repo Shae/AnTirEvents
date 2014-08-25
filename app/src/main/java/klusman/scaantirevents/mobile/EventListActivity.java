@@ -1,8 +1,10 @@
 package klusman.scaantirevents.mobile;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
 import java.text.ParseException;
@@ -34,7 +36,7 @@ public class EventListActivity extends ListActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.event_list_activity);
-
+        getActionBar().setHomeButtonEnabled(true);
         sDao = MyApp.getInstance().getDaoSession();
         eDao = sDao.getEventDao();
         eList.addAll(eDao.queryBuilder().orderAsc(EventDao.Properties.EventStart).listLazy());
@@ -54,7 +56,7 @@ public class EventListActivity extends ListActivity{
                 e1.printStackTrace();
             }
 
-            Log.i("TAG","mCal month/year = " + String.valueOf(mCal.get(Calendar.MONTH)) + "/" + String.valueOf(mCal.get(Calendar.YEAR)));
+           // Log.i("TAG","mCal month/year = " + String.valueOf(mCal.get(Calendar.MONTH)) + "/" + String.valueOf(mCal.get(Calendar.YEAR)));
 
 
             if( mCal.get(Calendar.MONTH) > currentMo.get(Calendar.MONTH))
@@ -62,8 +64,6 @@ public class EventListActivity extends ListActivity{
 
 
                 currentMo = mCal;
-
-
                 ListHeader lh = new ListHeader(EventListActivity.this, mCal);
                 View header = lh.getView();
                 vList.add(header);
@@ -109,5 +109,17 @@ public class EventListActivity extends ListActivity{
         return cal;
     }
 
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+
+                Intent goHome = new Intent(EventListActivity.this, MyActivity.class);
+                startActivity(goHome);
+                return true;
+            default:
+                return super.onMenuItemSelected(featureId, item);
+        }
+    }
 
 }

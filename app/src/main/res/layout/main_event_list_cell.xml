@@ -4,26 +4,82 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_margin="15dp">
 
-    <TextView
-        android:id="@+id/cell_title"
-
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Default Title"/>
+        android:orientation="horizontal"
+        android:layout_margin="5dp"
+        android:weightSum="5">
 
-    <TextView
-        android:id="@+id/cell_Location"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="TBD"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/cell_date_range"
+            <TextView
+                android:id="@+id/cell_title"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:text="Default Title"/>
+
+            <TextView
+                android:id="@+id/cell_Location"
+                android:layout_width="match_parent"
+                android:singleLine="true"
+                android:textSize="15dp"
+                android:textColor="@android:color/black"
+                android:layout_marginLeft="10dp"
+                android:layout_height="wrap_content"
+                android:text="TBD"/>
+
+
+            <TextView
+                android:id="@+id/cell_date_range"
+                android:layout_width="match_parent"
+                android:singleLine="true"
+                android:textSize="15dp"
+                android:textColor="@android:color/black"
+                android:layout_marginLeft="10dp"
+                android:layout_height="wrap_content"
+                android:text="start"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:id="@+id/cell_event_id"
+                android:visibility="gone"/>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/cell_fav_star"
+                android:layout_gravity="center"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                android:layout_weight="1"
+                android:src="@android:drawable/star_big_on"/>
+
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="start"/>
+        android:layout_height="1dp"
+        android:background="@color/white"/>
 
 </LinearLayout>

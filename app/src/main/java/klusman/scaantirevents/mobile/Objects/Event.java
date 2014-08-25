@@ -49,6 +49,9 @@ public class Event implements Parcelable {
     @SerializedName("EVENT_LOCATION")
     private String eventLocation;
 
+    @SerializedName("EVENT_FAVORITE")
+    private String eventFavorite;
+
 
     /** Used to resolve relations */
     private transient DaoSession daoSession;
@@ -65,6 +68,8 @@ public class Event implements Parcelable {
         this.eventId = eventId;
     }
 
+
+
     public Event(String eventId,
                  String eventLogo,
                  String eventName,
@@ -75,7 +80,8 @@ public class Event implements Parcelable {
                  String eventDesc,
                  String eventStart,
                  String eventEnd,
-                 String eventLocation) {
+                 String eventLocation,
+                 String eventFavorite) {
         this.eventId = eventId;
         this.eventLogo = eventLogo;
         this.eventName = eventName;
@@ -87,6 +93,7 @@ public class Event implements Parcelable {
         this.eventStart = eventStart;
         this.eventEnd = eventEnd;
         this.eventLocation = eventLocation;
+        this.eventFavorite = eventFavorite;
 
     }
 
@@ -184,7 +191,13 @@ public class Event implements Parcelable {
         this.eventLocation = eventLocation;
     }
 
+    public String getEventFavorite() {
+        return eventFavorite;
+    }
 
+    public void setEventFavorite(String eventFavorite) {
+        this.eventFavorite = eventFavorite;
+    }
 
 
 
@@ -231,6 +244,7 @@ public class Event implements Parcelable {
         parcel.writeString(eventStart);
         parcel.writeString(eventEnd);
         parcel.writeString(eventLocation);
+        parcel.writeString(eventFavorite);
 
     }
 }

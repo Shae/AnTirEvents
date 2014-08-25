@@ -21,13 +21,15 @@ public class CellEvent {
     View v;
     Context c;
     Event e;
+    String id;
 
     public CellEvent(Context context, Event event){
         c = context;
         e = event;
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         v = inflater.inflate(R.layout.main_event_list_cell, null);
-
+        v.setTag("Event");
+        id = event.getEventId();
         String sDate = null;
 
         TextView title = (TextView) v.findViewById(R.id.cell_title);
@@ -36,6 +38,10 @@ public class CellEvent {
         TextView location = (TextView) v.findViewById(R.id.cell_Location);
         String loc = getCleanLocation(e.getEventLocation());
         location.setText(loc);
+
+        TextView eId = (TextView) v.findViewById(R.id.cell_event_id);
+        eId.setText(e.getEventId());
+
 
         TextView date = (TextView) v.findViewById(R.id.cell_date_range);
         try {
@@ -177,6 +183,14 @@ public class CellEvent {
 
     public View getView(){
         return v;
+    }
+
+    public String getEventID(){
+        return id;
+    }
+
+    public Event getEvent(){
+        return e;
     }
 
 }

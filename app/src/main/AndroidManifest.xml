@@ -30,6 +30,10 @@
             android:name=".mobile.EventListActivity"
             android:windowSoftInputMode="adjustPan"/>
 
+        <activity
+            android:name=".mobile.EventDetail"
+            android:windowSoftInputMode="adjustPan"/>
+
 
     </application>
 

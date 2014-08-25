@@ -24,7 +24,7 @@ public class ListHeader {
         String Year = String.valueOf(calDate.get(Calendar.YEAR));
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         v = inflater.inflate(R.layout.cell_date_header, null);
-
+        v.setTag("Header");
         TextView tv = (TextView) v.findViewById(R.id.cell_header_text);
         tv.setText(Month + ", " + Year);
 

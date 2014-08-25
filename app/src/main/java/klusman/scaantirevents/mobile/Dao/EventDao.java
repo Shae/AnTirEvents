@@ -34,7 +34,7 @@ public class EventDao extends AbstractDao<Event, String> {
         public final static Property EventStart = new Property(8, String.class, "eventStart", false, "EVENT_START");
         public final static Property EventEnd = new Property(9, String.class, "eventEnd", false, "EVENT_END");
         public final static Property EventLocation = new Property(10, String.class, "eventLocation", false, "EVENT_LOCATION");
-
+        public final static Property EventFavorite = new Property(11, String.class, "eventFavorite", false, "EVENT_FAVORITE");
 
     }
 
@@ -64,7 +64,8 @@ public class EventDao extends AbstractDao<Event, String> {
                 "'EVENT_DESCRIPTION' TEXT," + // 7: eventDescription
                 "'EVENT_START' TEXT," + // 8: eventStart
                 "'EVENT_END' TEXT," + // 9: eventEnd
-                "'EVENT_LOCATION' TEXT);");// 10: eventLocation
+                "'EVENT_LOCATION' TEXT," + // 10: eventLocation
+                "'EVENT_FAVORITE' TEXT);"); //11: eventFavorite
 
     }
 
@@ -136,6 +137,11 @@ public class EventDao extends AbstractDao<Event, String> {
             stmt.bindString(11, eventLocation);
         }
 
+        String eventFavorite = entity.getEventFavorite();
+        if (eventFavorite != null) {
+            stmt.bindString(12, eventFavorite);
+        }
+
     }
 
     @Override
@@ -164,7 +170,8 @@ public class EventDao extends AbstractDao<Event, String> {
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // eventDescription
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // eventStart
             cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // eventEnd
-            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10) // eventLocation
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // eventLocation
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11) // eventFavorite
         );
         return entity;
     }
@@ -183,6 +190,7 @@ public class EventDao extends AbstractDao<Event, String> {
         entity.setEventStart(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
         entity.setEventEnd(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
         entity.setEventLocation(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setEventFavorite(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
      }
     
     /** @inheritdoc */
