@@ -24,15 +24,18 @@
 
         <activity
             android:name=".mobile.MyActivity"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize"/>
 
         <activity
             android:name=".mobile.EventListActivity"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize"/>
 
         <activity
             android:name=".mobile.EventDetail"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize"/>
 
 
     </application>

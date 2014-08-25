@@ -3,6 +3,7 @@ package klusman.scaantirevents.mobile.Objects;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.ParseException;
@@ -42,6 +43,12 @@ public class CellEvent {
         TextView eId = (TextView) v.findViewById(R.id.cell_event_id);
         eId.setText(e.getEventId());
 
+        ImageView fav = (ImageView) v.findViewById(R.id.cell_fav_star);
+        if(e.getEventFavorite() != null && e.getEventFavorite().compareToIgnoreCase("True") == 0){
+            fav.setVisibility(View.VISIBLE);
+        }else{
+            fav.setVisibility(View.INVISIBLE);
+        }
 
         TextView date = (TextView) v.findViewById(R.id.cell_date_range);
         try {

@@ -40,13 +40,10 @@ import klusman.scaantirevents.R;
 import klusman.scaantirevents.mobile.Dao.DaoMaster;
 import klusman.scaantirevents.mobile.Dao.DaoSession;
 import klusman.scaantirevents.mobile.Dao.EventDao;
-import klusman.scaantirevents.mobile.Objects.CellEvent;
 import klusman.scaantirevents.mobile.Objects.Event;
-import klusman.scaantirevents.mobile.Objects.ListHeader;
 
 
-public class MyActivity extends Activity{
-
+public class MyActivity extends Activity {
 
 
     EventDao eDao;
@@ -56,12 +53,12 @@ public class MyActivity extends Activity{
     Date minDate;
     Date maxDate;
 
+    String serverPullResult = "";
+
     List<JSONObject> JsonList = new ArrayList<JSONObject>();
 
-    private ProgressDialog progressDialog;
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.my_activity);
         mDao = MyApp.daoMaster;
@@ -73,9 +70,7 @@ public class MyActivity extends Activity{
 
         createPullDates();
 
-        progressDialog = new ProgressDialog(MyActivity.this);
-
-        Button eventsBTN = (Button)findViewById(R.id.go_to_events);
+        Button eventsBTN = (Button) findViewById(R.id.go_to_events);
         eventsBTN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,28 +80,38 @@ public class MyActivity extends Activity{
             }
         });
 
+        Button favoritesBTN = (Button) findViewById(R.id.go_to_favorites);
+        favoritesBTN.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent goToFavorites = new Intent(MyActivity.this, EventListActivity.class);
+                goToFavorites.putExtra("TYPE", "FAV");
+                startActivity(goToFavorites);
+
+            }
+        });
+
 
     }
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.my, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
         }
 
         if (id == R.id.action_pull) {
-        pullAll();
+            pullAll();
         }
 
         if (id == R.id.action_delete_db) {
@@ -116,33 +121,26 @@ public class MyActivity extends Activity{
         return super.onOptionsItemSelected(item);
     }
 
-    public void pullAll()
-    {
+    public void pullAll() {
         MyAsyncTask mat = new MyAsyncTask();
         mat.execute();
     }
 
 
-    class MyAsyncTask extends AsyncTask<String, String, String>
-    {
+    class MyAsyncTask extends AsyncTask<String, String, String> {
 
         InputStream inputStream = null;
         String result = "";
+        ProgressDialog progress;
 
         protected void onPreExecute() {
             Log.i("TAG", "Pre pull");
-            progressDialog.setMessage("Obtaining SCA Connection...");
-            progressDialog.show();
-            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                public void onCancel(DialogInterface arg0) {
-                    MyAsyncTask.this.cancel(true);
-                }
-            });
+            progress = ProgressDialog.show(MyActivity.this, "", "Pillaging the Servers...", true);
         }
 
+
         @Override
-        protected String doInBackground(String... params)
-        {
+        protected String doInBackground(String... params) {
             Log.i("TAG", "Start pull");
 
             StringBuilder builder = new StringBuilder();
@@ -152,15 +150,14 @@ public class MyActivity extends Activity{
                 HttpResponse response = client.execute(httpGet);
                 StatusLine statusLine = response.getStatusLine();
                 int statusCode = statusLine.getStatusCode();
-                if (statusCode == 200)
-                {
-                    //progressDialog.setMessage("Obtaining SCA Connection...");
+                if (statusCode == 200) {
+                    publishProgress("Flogging the Peasents...", " joy");
                     HttpEntity entity = response.getEntity();
                     InputStream content = entity.getContent();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(content));
                     String line;
-                    while ((line = reader.readLine()) != null)
-                    {
+
+                    while ((line = reader.readLine()) != null) {
                         builder.append(line);
                     }
 
@@ -177,148 +174,83 @@ public class MyActivity extends Activity{
         } // protected Void doInBackground(String... params)
 
 
+        protected void onProgressUpdate(Long... values) {
+
+            progress.setMessage(values[0] + "of " + values[1]);
+
+        }
+
         protected void onPostExecute(String result) {
             Log.i("TAG", "Post Execute");
-
-
-            //progressDialog.setMessage("Retrieving Data");
-            Log.i("TAG", "parse JSON Data Started");
-            try
-            {
-                JSONArray jsonArray = new JSONArray(result);
-                Log.i("TAG", "Number of entries in JSON Array " + jsonArray.length());
-                for (int i = 0; i < jsonArray.length(); i++)
-                {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    if(jsonObject.has("type")) {
-                        if (jsonObject.getString("type").compareToIgnoreCase("VEVENT") == 0) {
-                            Date mDate = new Date();
-                            mDate.setTime(calDateFromString(jsonObject.getString("start")).getTimeInMillis());
-
-                            if(mDate.getTime() > minDate.getTime() && mDate.getTime() < maxDate.getTime()){
-                                JsonList.add(jsonObject);
-                            }
-
-                        }
-                    }
-                }
-
-                //progressDialog.setMessage("Processing Information...");
-
-                List<Event> eList = eDao.loadAll();
-                try
-                {
-                    for(JSONObject jObj : JsonList)
-                    {
-                        boolean match = false;
-
-                        if(jObj.has("uid"))
-                        {
-                            String strID = jObj.get("uid").toString();
-                            for(Event e : eList){
-                                if( e.getEventId().compareToIgnoreCase(strID) == 0){
-                                    match = true;
-                                }
-                            }
-                        }
-
-                        if(match){
-                            upDateEvent(jObj);
-                        }else{
-                            makeNewEvent(jObj);
-                        }
-                    }
-                    Log.i("TAG", "Event Dao length = " + eDao.count());
-                   // progressDialog.setMessage("COMPLETE");
-                    progressDialog.dismiss();
-                }
-                catch (JSONException e1)
-                {
-                    e1.printStackTrace();
-                    progressDialog.dismiss();
-                }
-
-
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            //  workMagic(result);
+            serverPullResult = result;
+            progress.dismiss();
+            new addDataToDBTask().execute();
 
         } // protected void onPostExecute(Void v)
 
     } //class MyAsyncTask extends AsyncTask<String, String, Void>
 
 
+    public void upDateEvent(JSONObject jObject) {
+        // Log.i("TAG", "Update Event");
 
-
-
-
-    public void upDateEvent(JSONObject jObject){
-       // Log.i("TAG", "Update Event");
-
-        try
-        {
+        try {
             Event ev = eDao.load(jObject.getString("uid"));
 
-            if(jObject.has("summary"))
+            if (jObject.has("summary"))
                 ev.setEventName(jObject.getString("summary"));
 
-            if(jObject.has("description"))
+            if (jObject.has("description"))
                 ev.setEventDescription(jObject.getString("description"));
 
-            if(jObject.has("start"))
+            if (jObject.has("start"))
                 ev.setEventStart(jObject.getString("start"));
 
-            if(jObject.has("end"))
+            if (jObject.has("end"))
                 ev.setEventEnd(jObject.getString("end"));
 
-            if(jObject.has("location"))
+            if (jObject.has("location"))
                 ev.setEventLocation(jObject.getString("location"));
 
             eDao.update(ev);
 
-        }
-        catch (JSONException e)
-        {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
     }
 
-    public void makeNewEvent(JSONObject jObject){
+    public void makeNewEvent(JSONObject jObject) {
         Event event = new Event();
         event.__setDaoSession(sDao);
 
-        try
-        {
+        try {
             event.setEventId(jObject.getString("uid"));
 
-            if(jObject.has("summary"))
+            if (jObject.has("summary"))
                 event.setEventName(jObject.getString("summary"));
 
-            if(jObject.has("description"))
+            if (jObject.has("description"))
                 event.setEventDescription(jObject.getString("description"));
 
-            if(jObject.has("start"))
+            if (jObject.has("start"))
                 event.setEventStart(jObject.getString("start"));
 
-            if(jObject.has("end"))
-                 event.setEventEnd(jObject.getString("end"));
+            if (jObject.has("end"))
+                event.setEventEnd(jObject.getString("end"));
 
-            if(jObject.has("location"))
+            if (jObject.has("location"))
                 event.setEventLocation(jObject.getString("location"));
 
             eDao.insert(event);
-        }
-        catch (JSONException e)
-        {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
     }
 
-    private void createPullDates(){
+    private void createPullDates() {
 
         int monthsToAdd = 13;
         int monthsToSubtract = 1;
@@ -356,6 +288,81 @@ public class MyActivity extends Activity{
         cal.setTime(date);
         return cal;
     }
+
+    class addDataToDBTask extends AsyncTask<Void, Void, Void> {
+        ProgressDialog progress;
+
+        protected void onPreExecute() {
+            Log.i("TAG", "Pre pull");
+            progress = ProgressDialog.show(MyActivity.this, "", "Flogging the Peasents...", true);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.i("TAG", "parse JSON Data Started");
+            try {
+                JSONArray jsonArray = new JSONArray(serverPullResult);
+                Log.i("TAG", "Number of entries in JSON Array " + jsonArray.length());
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    if (jsonObject.has("type")) {
+                        if (jsonObject.getString("type").compareToIgnoreCase("VEVENT") == 0) {
+                            Date mDate = new Date();
+                            mDate.setTime(calDateFromString(jsonObject.getString("start")).getTimeInMillis());
+
+                            if (mDate.after(minDate) && mDate.before(maxDate)) {
+                                Log.i("TAG", "event added");
+                                JsonList.add(jsonObject);
+                            }
+                        }
+                    }
+                }
+                List<Event> eList = eDao.loadAll();
+                try {
+
+                    for (JSONObject jObj : JsonList) {
+                        boolean match = false;
+
+                        if (jObj.has("uid")) {
+                            String strID = jObj.get("uid").toString();
+                            for (Event e : eList) {
+                                if (e.getEventId().compareToIgnoreCase(strID) == 0) {
+                                    match = true;
+                                }
+                            }
+                        }
+
+                        if (match) {
+                            upDateEvent(jObj);
+                        } else {
+                            makeNewEvent(jObj);
+                        }
+                    }
+                    Log.i("TAG", "Event Dao length = " + eDao.count());
+                    progress.dismiss();
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if(progress.isShowing()){
+                progress.dismiss();
+            }
+            return null;
+
+        } // protected Void doInBackground(String... params)
+
+
+        protected void onPostExecute(String result) {
+            Log.i("TAG", "Post Execute Push to DB");
+
+
+        } // protected void onPostExecute(Void v)
+
+    } //class MyAsyncTask extends AsyncTask<String, String, Void>
 
 
 

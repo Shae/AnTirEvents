@@ -7,9 +7,17 @@
     android:gravity="center">
 
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="EVENTS"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:text="ALL\nEVENTS"
         android:id="@+id/go_to_events"
         android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:text="MY\nFAVORITES"
+        android:id="@+id/go_to_favorites"
+        android:layout_gravity="center_horizontal" />
+
 </LinearLayout>
