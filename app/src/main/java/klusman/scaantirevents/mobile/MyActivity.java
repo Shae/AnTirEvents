@@ -2,7 +2,6 @@ package klusman.scaantirevents.mobile;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -40,8 +39,8 @@ import klusman.scaantirevents.R;
 import klusman.scaantirevents.mobile.Dao.DaoMaster;
 import klusman.scaantirevents.mobile.Dao.DaoSession;
 import klusman.scaantirevents.mobile.Dao.EventDao;
+import klusman.scaantirevents.mobile.Objects.AlarmSchedulerForSync;
 import klusman.scaantirevents.mobile.Objects.Event;
-
 
 public class MyActivity extends Activity {
 
@@ -49,18 +48,20 @@ public class MyActivity extends Activity {
     EventDao eDao;
     DaoSession sDao;
     DaoMaster mDao;
-
+    ProgressDialog mProgressDialog;
     Date minDate;
     Date maxDate;
 
     String serverPullResult = "";
-
     List<JSONObject> JsonList = new ArrayList<JSONObject>();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.my_activity);
+
+
         mDao = MyApp.daoMaster;
         sDao = MyApp.getInstance().getDaoSession();
         eDao = sDao.getEventDao();
@@ -70,10 +71,17 @@ public class MyActivity extends Activity {
 
         createPullDates();
 
+        if (eDao.count() <= 0)
+        {
+            pullAll();
+        }
+
         Button eventsBTN = (Button) findViewById(R.id.go_to_events);
-        eventsBTN.setOnClickListener(new View.OnClickListener() {
+        eventsBTN.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 Intent goToEvents = new Intent(MyActivity.this, EventListActivity.class);
                 startActivity(goToEvents);
 
@@ -81,9 +89,11 @@ public class MyActivity extends Activity {
         });
 
         Button favoritesBTN = (Button) findViewById(R.id.go_to_favorites);
-        favoritesBTN.setOnClickListener(new View.OnClickListener() {
+        favoritesBTN.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
 
                 Intent goToFavorites = new Intent(MyActivity.this, EventListActivity.class);
                 goToFavorites.putExtra("TYPE", "FAV");
@@ -91,109 +101,59 @@ public class MyActivity extends Activity {
 
             }
         });
-
-
     }
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.my, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_settings)
+        {
             return true;
         }
 
-        if (id == R.id.action_pull) {
-            pullAll();
+        if (id == R.id.action_pull)
+        {
+            pullAll();  // using this instead of the broadcast because I want the spinner to show
+
+//           Intent i = new Intent("klusman.scaantirevents.mobile.USER_ACTION");
+//           sendBroadcast(i);
         }
 
-        if (id == R.id.action_delete_db) {
-            mDao.dropAllTables(mDao.getDatabase(), true);
+        if (id == R.id.action_cancel_alarm)
+        {
+            AlarmSchedulerForSync alrm = new AlarmSchedulerForSync(this);
+            if (alrm.checkIfAlarmIsActive())
+            {
+                alrm.cancelPendingAlarms();
+            }
+        }
+
+        if (id == R.id.action_delete_db)
+        {
+            DaoMaster.dropAllTables(mDao.getDatabase(), true);
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void pullAll() {
+    public void pullAll()
+    {
         MyAsyncTask mat = new MyAsyncTask();
         mat.execute();
     }
 
-
-    class MyAsyncTask extends AsyncTask<String, String, String> {
-
-        InputStream inputStream = null;
-        String result = "";
-        ProgressDialog progress;
-
-        protected void onPreExecute() {
-            Log.i("TAG", "Pre pull");
-            progress = ProgressDialog.show(MyActivity.this, "", "Pillaging the Servers...", true);
-        }
-
-
-        @Override
-        protected String doInBackground(String... params) {
-            Log.i("TAG", "Start pull");
-
-            StringBuilder builder = new StringBuilder();
-            HttpClient client = new DefaultHttpClient();
-            HttpGet httpGet = new HttpGet("http://scalac.herokuapp.com");
-            try {
-                HttpResponse response = client.execute(httpGet);
-                StatusLine statusLine = response.getStatusLine();
-                int statusCode = statusLine.getStatusCode();
-                if (statusCode == 200) {
-                    publishProgress("Flogging the Peasents...", " joy");
-                    HttpEntity entity = response.getEntity();
-                    InputStream content = entity.getContent();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(content));
-                    String line;
-
-                    while ((line = reader.readLine()) != null) {
-                        builder.append(line);
-                    }
-
-                } else {
-                    Log.e("TAG", "Failed to download file");
-                }
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return builder.toString();
-        } // protected Void doInBackground(String... params)
-
-
-        protected void onProgressUpdate(Long... values) {
-
-            progress.setMessage(values[0] + "of " + values[1]);
-
-        }
-
-        protected void onPostExecute(String result) {
-            Log.i("TAG", "Post Execute");
-            //  workMagic(result);
-            serverPullResult = result;
-            progress.dismiss();
-            new addDataToDBTask().execute();
-
-        } // protected void onPostExecute(Void v)
-
-    } //class MyAsyncTask extends AsyncTask<String, String, Void>
-
-
     public void upDateEvent(JSONObject jObject) {
-        // Log.i("TAG", "Update Event");
+        Log.i("TAG", "Update Event");
 
         try {
             Event ev = eDao.load(jObject.getString("uid"));
@@ -289,12 +249,77 @@ public class MyActivity extends Activity {
         return cal;
     }
 
-    class addDataToDBTask extends AsyncTask<Void, Void, Void> {
+    class MyAsyncTask extends AsyncTask<String, String, String> {
+
+        InputStream inputStream = null;
+        String result = "";
         ProgressDialog progress;
 
         protected void onPreExecute() {
             Log.i("TAG", "Pre pull");
-            progress = ProgressDialog.show(MyActivity.this, "", "Flogging the Peasents...", true);
+            progress = ProgressDialog.show(MyActivity.this, "", "Pillaging the Servers for Event Data", true);
+        }
+
+
+        @Override
+        protected String doInBackground(String... params) {
+            Log.i("TAG", "Start pull");
+
+            StringBuilder builder = new StringBuilder();
+            HttpClient client = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet("http://scalac.herokuapp.com");
+            try {
+                HttpResponse response = client.execute(httpGet);
+                StatusLine statusLine = response.getStatusLine();
+                int statusCode = statusLine.getStatusCode();
+                if (statusCode == 200) {
+                    // publishProgress("Flogging the Peasents...", " joy");
+                    HttpEntity entity = response.getEntity();
+                    InputStream content = entity.getContent();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+                        builder.append(line);
+                    }
+
+                } else {
+                    Log.e("TAG", "Failed to download file");
+                }
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return builder.toString();
+        } // protected Void doInBackground(String... params)
+
+
+//        protected void onProgressUpdate(Long... values) {
+//            //progress.setMessage(values[0] + "of " + values[1]);
+//            setprogressMsg(values[0] + "of " + values[1]);
+//        }
+
+        protected void onPostExecute(String result) {
+            Log.i("TAG", "Post Execute");
+            serverPullResult = result;
+            progress.dismiss();
+            // new addDataToDBTask().execute();
+
+
+            runDataParse();
+
+
+        } // protected void onPostExecute(Void v)
+
+    } //class MyAsyncTask extends AsyncTask<String, String, Void>
+
+    class addDataToDBTask extends AsyncTask<Void, Integer, Void> {
+
+        protected void onPreExecute() {
+            Log.i("TAG", "Pre pull");
+            //  progress = ProgressDialog.show(MyActivity.this, "", "Organizing Events", true);
         }
 
         @Override
@@ -302,8 +327,11 @@ public class MyActivity extends Activity {
             Log.i("TAG", "parse JSON Data Started");
             try {
                 JSONArray jsonArray = new JSONArray(serverPullResult);
-                Log.i("TAG", "Number of entries in JSON Array " + jsonArray.length());
-                for (int i = 0; i < jsonArray.length(); i++) {
+                long totalSize = jsonArray.length();
+                Log.i("TAG", "Number of entries in JSON Array " + totalSize);
+
+                for (int i = 0; i < totalSize; i++)
+                {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     if (jsonObject.has("type")) {
                         if (jsonObject.getString("type").compareToIgnoreCase("VEVENT") == 0) {
@@ -319,9 +347,20 @@ public class MyActivity extends Activity {
                 }
                 List<Event> eList = eDao.loadAll();
                 try {
-
+                    int count = 0;
                     for (JSONObject jObj : JsonList) {
                         boolean match = false;
+                        count++;
+                        float num;
+                        Log.i("TAG", " %" + ( (count / (float) JsonList.size()) * 100));
+                        num = ( (count / (float) JsonList.size()) * 100);
+                        if(num%2 == 0){
+                            publishProgress((int)num);
+                        }
+                        if (count == JsonList.size()){
+                            mProgressDialog.dismiss();
+                        }
+
 
                         if (jObj.has("uid")) {
                             String strID = jObj.get("uid").toString();
@@ -339,7 +378,7 @@ public class MyActivity extends Activity {
                         }
                     }
                     Log.i("TAG", "Event Dao length = " + eDao.count());
-                    progress.dismiss();
+                    //progress.dismiss();
                 } catch (JSONException e1) {
                     e1.printStackTrace();
                 }
@@ -348,9 +387,6 @@ public class MyActivity extends Activity {
                 e.printStackTrace();
             }
 
-            if(progress.isShowing()){
-                progress.dismiss();
-            }
             return null;
 
         } // protected Void doInBackground(String... params)
@@ -362,8 +398,22 @@ public class MyActivity extends Activity {
 
         } // protected void onPostExecute(Void v)
 
+        @Override
+        public void onProgressUpdate(Integer... args) {
+            mProgressDialog.setProgress(args[0]);
+        }
     } //class MyAsyncTask extends AsyncTask<String, String, Void>
 
 
+    public void runDataParse() {
+        mProgressDialog = new ProgressDialog(MyActivity.this);
+        mProgressDialog.setMessage("Flog the Peasents...");
+        mProgressDialog.setIndeterminate(false);
+        mProgressDialog.setMax(100);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mProgressDialog.show();
+        addDataToDBTask add = new addDataToDBTask();
+        add.execute();
+    }
 
 }

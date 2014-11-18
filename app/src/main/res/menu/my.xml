@@ -8,9 +8,14 @@
         android:showAsAction="never" />
 
     <item android:id="@+id/action_pull"
-        android:title="Sync"
+        android:title="Sync NOW"
         android:orderInCategory="1"
-        android:showAsAction="always" />
+        android:showAsAction="never" />
+
+    <item android:id="@+id/action_cancel_alarm"
+        android:title="Cancel Sync Alarm"
+        android:orderInCategory="1"
+        android:showAsAction="never" />
 
     <item android:id="@+id/action_delete_db"
         android:title="Delete DB"

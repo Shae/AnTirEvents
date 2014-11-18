@@ -7,6 +7,7 @@ import android.util.Log;
 
 import klusman.scaantirevents.mobile.Dao.DaoMaster;
 import klusman.scaantirevents.mobile.Dao.DaoSession;
+import klusman.scaantirevents.mobile.Objects.AlarmSchedulerForSync;
 
 
 public class MyApp extends Application {
@@ -15,6 +16,7 @@ public class MyApp extends Application {
     private static MyApp sInstance;
     public static DaoMaster daoMaster;
 
+    AlarmSchedulerForSync syncAlarm;
 
 
     @Override
@@ -23,6 +25,13 @@ public class MyApp extends Application {
         super.onCreate();
         sInstance = this;
         getDaoSession();
+
+        syncAlarm = new AlarmSchedulerForSync(this);
+
+        if (!syncAlarm.checkIfAlarmIsActive()){
+            syncAlarm.setAlarmSchedule();
+            // If sync Schedule is not set... set it
+        }
 
     }
 
@@ -41,4 +50,6 @@ public class MyApp extends Application {
         Log.i("TAG", "getDaoSession Started");
         return daoSession;
     }
+
+
 }

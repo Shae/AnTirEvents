@@ -37,7 +37,15 @@
             android:windowSoftInputMode="adjustPan"
             android:configChanges="orientation|screenSize"/>
 
+        <receiver android:name="klusman.scaantirevents.mobile.Tasks.SyncDataBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="klusman.scaantirevents.mobile.USER_ACTION" />
+            </intent-filter>
+        </receiver>
+
 
     </application>
+
+
 
 </manifest>
