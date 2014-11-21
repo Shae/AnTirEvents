@@ -56,11 +56,9 @@ public class MyActivity extends Activity {
     List<JSONObject> JsonList = new ArrayList<JSONObject>();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.my_activity);
-
 
         mDao = MyApp.daoMaster;
         sDao = MyApp.getInstance().getDaoSession();
@@ -71,29 +69,23 @@ public class MyActivity extends Activity {
 
         createPullDates();
 
-        if (eDao.count() <= 0)
-        {
+        if (eDao.count() <= 0) {
             pullAll();
         }
 
         Button eventsBTN = (Button) findViewById(R.id.go_to_events);
-        eventsBTN.setOnClickListener(new View.OnClickListener()
-        {
+        eventsBTN.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 Intent goToEvents = new Intent(MyActivity.this, EventListActivity.class);
                 startActivity(goToEvents);
-
             }
         });
 
         Button favoritesBTN = (Button) findViewById(R.id.go_to_favorites);
-        favoritesBTN.setOnClickListener(new View.OnClickListener()
-        {
+        favoritesBTN.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
 
                 Intent goToFavorites = new Intent(MyActivity.this, EventListActivity.class);
                 goToFavorites.putExtra("TYPE", "FAV");
@@ -105,49 +97,41 @@ public class MyActivity extends Activity {
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.my, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings)
-        {
+        if (id == R.id.action_settings) {
             return true;
         }
 
-        if (id == R.id.action_pull)
-        {
+        if (id == R.id.action_pull) {
             pullAll();  // using this instead of the broadcast because I want the spinner to show
 
-//           Intent i = new Intent("klusman.scaantirevents.mobile.USER_ACTION");
-//           sendBroadcast(i);
+            //Intent i = new Intent("klusman.scaantirevents.mobile.USER_ACTION");
+            //sendBroadcast(i);
         }
 
-        if (id == R.id.action_cancel_alarm)
-        {
+        if (id == R.id.action_cancel_alarm) {
             AlarmSchedulerForSync alrm = new AlarmSchedulerForSync(this);
-            if (alrm.checkIfAlarmIsActive())
-            {
+            if (alrm.checkIfAlarmIsActive()) {
                 alrm.cancelPendingAlarms();
             }
         }
 
-        if (id == R.id.action_delete_db)
-        {
+        if (id == R.id.action_delete_db) {
             DaoMaster.dropAllTables(mDao.getDatabase(), true);
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void pullAll()
-    {
+    public void pullAll() {
         MyAsyncTask mat = new MyAsyncTask();
         mat.execute();
     }
@@ -182,6 +166,7 @@ public class MyActivity extends Activity {
     }
 
     public void makeNewEvent(JSONObject jObject) {
+        Log.i("TAG", "Make New Event");
         Event event = new Event();
         event.__setDaoSession(sDao);
 
@@ -202,9 +187,10 @@ public class MyActivity extends Activity {
 
             if (jObject.has("location"))
                 event.setEventLocation(jObject.getString("location"));
-
+            Log.i("TAG", "Event with error: " + event.getEventName() + "  Id: " + event.getEventId());
             eDao.insert(event);
         } catch (JSONException e) {
+            Log.i("TAG", "Event with error: " + event.getEventName() + "  Id: " + event.getEventId());
             e.printStackTrace();
         }
 
@@ -250,14 +236,11 @@ public class MyActivity extends Activity {
     }
 
     class MyAsyncTask extends AsyncTask<String, String, String> {
-
-        InputStream inputStream = null;
-        String result = "";
         ProgressDialog progress;
 
         protected void onPreExecute() {
             Log.i("TAG", "Pre pull");
-            progress = ProgressDialog.show(MyActivity.this, "", "Pillaging the Servers for Event Data", true);
+            progress = ProgressDialog.show(MyActivity.this, "", "Pillaging the Servers \nfor Event Data", true);
         }
 
 
@@ -273,7 +256,7 @@ public class MyActivity extends Activity {
                 StatusLine statusLine = response.getStatusLine();
                 int statusCode = statusLine.getStatusCode();
                 if (statusCode == 200) {
-                    // publishProgress("Flogging the Peasents...", " joy");
+
                     HttpEntity entity = response.getEntity();
                     InputStream content = entity.getContent();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(content));
@@ -295,22 +278,11 @@ public class MyActivity extends Activity {
             return builder.toString();
         } // protected Void doInBackground(String... params)
 
-
-//        protected void onProgressUpdate(Long... values) {
-//            //progress.setMessage(values[0] + "of " + values[1]);
-//            setprogressMsg(values[0] + "of " + values[1]);
-//        }
-
         protected void onPostExecute(String result) {
             Log.i("TAG", "Post Execute");
             serverPullResult = result;
             progress.dismiss();
-            // new addDataToDBTask().execute();
-
-
             runDataParse();
-
-
         } // protected void onPostExecute(Void v)
 
     } //class MyAsyncTask extends AsyncTask<String, String, Void>
@@ -330,8 +302,7 @@ public class MyActivity extends Activity {
                 long totalSize = jsonArray.length();
                 Log.i("TAG", "Number of entries in JSON Array " + totalSize);
 
-                for (int i = 0; i < totalSize; i++)
-                {
+                for (int i = 0; i < totalSize; i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     if (jsonObject.has("type")) {
                         if (jsonObject.getString("type").compareToIgnoreCase("VEVENT") == 0) {
@@ -339,7 +310,6 @@ public class MyActivity extends Activity {
                             mDate.setTime(calDateFromString(jsonObject.getString("start")).getTimeInMillis());
 
                             if (mDate.after(minDate) && mDate.before(maxDate)) {
-                                Log.i("TAG", "event added");
                                 JsonList.add(jsonObject);
                             }
                         }
@@ -351,13 +321,13 @@ public class MyActivity extends Activity {
                     for (JSONObject jObj : JsonList) {
                         boolean match = false;
                         count++;
-                        float num;
-                        Log.i("TAG", " %" + ( (count / (float) JsonList.size()) * 100));
-                        num = ( (count / (float) JsonList.size()) * 100);
-                        if(num%2 == 0){
-                            publishProgress((int)num);
+                        int num;
+                        Log.i("TAG", " %" + ((count / (float) JsonList.size()) * 100));
+                        num = (int) ((count / (float) JsonList.size()) * 100);
+                        if (num % 5 == 0) {
+                            publishProgress((int) num);
                         }
-                        if (count == JsonList.size()){
+                        if (count == JsonList.size()) {
                             mProgressDialog.dismiss();
                         }
 
@@ -369,17 +339,18 @@ public class MyActivity extends Activity {
                                     match = true;
                                 }
                             }
+                            if (match) {
+                                upDateEvent(jObj);
+                            } else {
+                                makeNewEvent(jObj);
+                            }
                         }
 
-                        if (match) {
-                            upDateEvent(jObj);
-                        } else {
-                            makeNewEvent(jObj);
-                        }
                     }
                     Log.i("TAG", "Event Dao length = " + eDao.count());
                     //progress.dismiss();
                 } catch (JSONException e1) {
+
                     e1.printStackTrace();
                 }
 
@@ -394,8 +365,6 @@ public class MyActivity extends Activity {
 
         protected void onPostExecute(String result) {
             Log.i("TAG", "Post Execute Push to DB");
-
-
         } // protected void onPostExecute(Void v)
 
         @Override
@@ -407,7 +376,7 @@ public class MyActivity extends Activity {
 
     public void runDataParse() {
         mProgressDialog = new ProgressDialog(MyActivity.this);
-        mProgressDialog.setMessage("Flog the Peasents...");
+        mProgressDialog.setMessage("Flog the Peasants...");
         mProgressDialog.setIndeterminate(false);
         mProgressDialog.setMax(100);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);

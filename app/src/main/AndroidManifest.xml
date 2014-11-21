@@ -3,6 +3,8 @@
     package="klusman.scaantirevents" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
 
     <application
         android:icon="@drawable/an_tir_logo"
@@ -37,11 +39,16 @@
             android:windowSoftInputMode="adjustPan"
             android:configChanges="orientation|screenSize"/>
 
-        <receiver android:name="klusman.scaantirevents.mobile.Tasks.SyncDataBroadcastReceiver" >
+
+
+        <receiver android:name=".mobile.SyncDataBroadcastReceiver">
             <intent-filter>
-                <action android:name="klusman.scaantirevents.mobile.USER_ACTION" />
+                <action android:name="ALARM_SYNC_EVENT"/>
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".mobile.Tasks.MyAlarmReceiver" />
+
 
 
     </application>

@@ -30,6 +30,7 @@ public class MyApp extends Application {
 
         if (!syncAlarm.checkIfAlarmIsActive()){
             syncAlarm.setAlarmSchedule();
+
             // If sync Schedule is not set... set it
         }
 

@@ -1,4 +1,4 @@
-package klusman.scaantirevents.mobile.Tasks;
+package klusman.scaantirevents.mobile;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -59,11 +59,12 @@ public class SyncDataBroadcastReceiver extends BroadcastReceiver
 
         minDate = new Date();
         maxDate = new Date();
-        createPullDates();
+
         pullAll();
     }
 
     public void pullAll() {
+        createPullDates();
         Log.i("TAG", "Start Event Sync");
         MyAsyncTask mat = new MyAsyncTask();
         mat.execute();
@@ -72,8 +73,8 @@ public class SyncDataBroadcastReceiver extends BroadcastReceiver
     class MyAsyncTask extends AsyncTask<String, String, String>
     {
 
-        InputStream inputStream = null;
-        String result = "";
+       // InputStream inputStream = null;
+      //  String result = "";
 
         protected void onPreExecute() {
             Log.i("TAG", "Pre pull");
@@ -125,7 +126,6 @@ public class SyncDataBroadcastReceiver extends BroadcastReceiver
             new addDataToDBTask().execute();
 
         } // protected void onPostExecute(Void v)
-
     } //class MyAsyncTask extends AsyncTask<String, String, Void>
 
 
@@ -152,7 +152,6 @@ public class SyncDataBroadcastReceiver extends BroadcastReceiver
                             mDate.setTime(calDateFromString(jsonObject.getString("start")).getTimeInMillis());
 
                             if (mDate.after(minDate) && mDate.before(maxDate)) {
-                                Log.i("TAG", "event added");
                                 JsonList.add(jsonObject);
                             }
                         }
@@ -167,16 +166,16 @@ public class SyncDataBroadcastReceiver extends BroadcastReceiver
                         if (jObj.has("uid")) {
                             String strID = jObj.get("uid").toString();
                             for (Event e : eList) {
+
                                 if (e.getEventId().compareToIgnoreCase(strID) == 0) {
                                     match = true;
                                 }
                             }
-                        }
-
-                        if (match) {
-                            upDateEvent(jObj);
-                        } else {
-                            makeNewEvent(jObj);
+                            if (match) {
+                                upDateEvent(jObj);
+                            } else {
+                                makeNewEvent(jObj);
+                            }
                         }
                     }
                     Log.i("TAG", "Event Dao length = " + eDao.count());
@@ -188,8 +187,6 @@ public class SyncDataBroadcastReceiver extends BroadcastReceiver
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
             return null;
 
         } // protected Void doInBackground(String... params)
@@ -197,10 +194,7 @@ public class SyncDataBroadcastReceiver extends BroadcastReceiver
 
         protected void onPostExecute(String result) {
             Log.i("TAG", "Post Execute Push to DB");
-
-
         } // protected void onPostExecute(Void v)
-
     } //class MyAsyncTask extends AsyncTask<String, String, Void>
 
 
@@ -235,6 +229,7 @@ public class SyncDataBroadcastReceiver extends BroadcastReceiver
     }
 
     public void makeNewEvent(JSONObject jObject) {
+        Log.i("TAG", "Make New Event");
         Event event = new Event();
         event.__setDaoSession(sDao);
 
@@ -258,6 +253,7 @@ public class SyncDataBroadcastReceiver extends BroadcastReceiver
 
             eDao.insert(event);
         } catch (JSONException e) {
+            Log.i("TAG", "Event with error: " + event.getEventName() + "  Id: " + event.getEventId());
             e.printStackTrace();
         }
 
